@@ -9,7 +9,7 @@ import {
   Param,
   Post,
   Redirect,
-  Req, UseFilters, UsePipes,
+  Req, UseFilters, UseGuards, UsePipes,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable, of } from 'rxjs';
@@ -19,13 +19,17 @@ import { ForbiddenException } from '../forbidden.exception';
 import { HttpExceptionFilter } from '../http-exception.filter';
 import { ValidationPipe } from '../validation.pipe';
 import {  ParseIntPipe } from '../parse-int.pipe';
+import { RoleGuard } from '../role.guard';
+import { Roles } from '../roles.decorator';
 
 @Controller('cats')
+@UseGuards(RoleGuard)
 export class CatsController {
   constructor(private catsService: CatsService) {
   }
 
   @Post()
+  @Roles(['admin'])
   // @UsePipes(new ZodValidationPipe(createCatSchema))
   // @UseFilters(HttpExceptionFilter)
   // 인스턴스 대신 클래스로 필터등록하는 것을 권장. Nestjs에서 자동으로 인스턴스를 관리해 메모리 사용량을 최적화한다.
