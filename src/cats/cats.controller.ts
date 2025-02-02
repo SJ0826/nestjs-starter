@@ -2,19 +2,23 @@ import { Body, Controller, Get, Header, HttpCode, Param, Post, Redirect, Req } f
 import { Request } from 'express';
 import { Observable, of } from 'rxjs';
 import { CreateCatDto } from './dto/create-cat.dto';
+import { CatsService } from './cats.service';
 
 @Controller('cats')
 export class CatsController {
+  constructor(private catsService: CatsService) {
+  }
+
   @Post()
   // @HttpCode(204) 상태코드 변경 가능
   // @Header('Cache-Control', 'no-store') 응답 헤더
-  create(@Body() createCatDto: CreateCatDto): string {
-    return 'This action adds a new cat';
+  create(@Body() createCatDto: CreateCatDto) {
+    return this.catsService.create(createCatDto)
   }
 
   @Get()
   async findAll(@Req() request: Request): Promise<any[]> {
-    return [];
+    return this.catsService.findAll();
   }
 
  /*
@@ -28,7 +32,6 @@ export class CatsController {
 
   @Get(':id')
   findOne(@Param() params: any): string {
-    console.log(params.id);
     return `This action returns a #${params.id} cat`;
   }
 }
