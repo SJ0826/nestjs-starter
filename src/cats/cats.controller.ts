@@ -1,8 +1,22 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Redirect, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Redirect,
+  Req, UseFilters,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { Observable, of } from 'rxjs';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { CatsService } from './cats.service';
+import { ForbiddenException } from '../forbidden.exception';
+import { HttpExceptionFilter } from '../http-exception.filter';
 
 @Controller('cats')
 export class CatsController {
@@ -10,6 +24,8 @@ export class CatsController {
   }
 
   @Post()
+  // @UseFilters(HttpExceptionFilter)
+  // 인스턴스 대신 클래스로 필터등록하는 것을 권장. Nestjs에서 자동으로 인스턴스를 관리해 메모리 사용량을 최적화한다.
   // @HttpCode(204) 상태코드 변경 가능
   // @Header('Cache-Control', 'no-store') 응답 헤더
   create(@Body() createCatDto: CreateCatDto) {
@@ -17,8 +33,18 @@ export class CatsController {
   }
 
   @Get()
-  async findAll(@Req() request: Request): Promise<any[]> {
-    return this.catsService.findAll();
+  async findAll(@Req() request: Request){
+    try {
+      await this.catsService.findAll();
+    } catch (error) {
+      // throw new HttpException({
+      //   status: HttpStatus.FORBIDDEN,
+      //   error: 'This is a custom message',
+      // }, HttpStatus.FORBIDDEN, {
+      //   cause: error
+      // });
+      throw new ForbiddenException()
+    }
   }
 
  /*
