@@ -9,7 +9,7 @@ import {
   Param,
   Post,
   Redirect,
-  Req, UseFilters,
+  Req, UseFilters, UsePipes,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable, of } from 'rxjs';
@@ -17,6 +17,8 @@ import { CreateCatDto } from './dto/create-cat.dto';
 import { CatsService } from './cats.service';
 import { ForbiddenException } from '../forbidden.exception';
 import { HttpExceptionFilter } from '../http-exception.filter';
+import { ValidationPipe } from '../validation.pipe';
+import {  ParseIntPipe } from '../parse-int.pipe';
 
 @Controller('cats')
 export class CatsController {
@@ -24,11 +26,12 @@ export class CatsController {
   }
 
   @Post()
+  // @UsePipes(new ZodValidationPipe(createCatSchema))
   // @UseFilters(HttpExceptionFilter)
   // 인스턴스 대신 클래스로 필터등록하는 것을 권장. Nestjs에서 자동으로 인스턴스를 관리해 메모리 사용량을 최적화한다.
   // @HttpCode(204) 상태코드 변경 가능
   // @Header('Cache-Control', 'no-store') 응답 헤더
-  create(@Body() createCatDto: CreateCatDto) {
+  create(@Body(new ValidationPipe()) createCatDto: CreateCatDto) {
     return this.catsService.create(createCatDto)
   }
 
@@ -57,7 +60,7 @@ export class CatsController {
 */
 
   @Get(':id')
-  findOne(@Param() params: any): string {
-    return `This action returns a #${params.id} cat`;
+  findOne(@Param('id', new ParseIntPipe()) id) {
+    return this.catsService.findOne(id)
   }
 }

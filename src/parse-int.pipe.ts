@@ -1,0 +1,13 @@
+import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+
+@Injectable()
+export class ParseIntPipe implements PipeTransform<string, number> {
+  transform(value: string, metadata: ArgumentMetadata): number {
+    const val = parseInt(value, 10); // 10진수로 문자열을 정수로 변환
+    if(isNaN(val)) {
+      throw new BadRequestException('Invalid value');
+    }
+
+    return val;
+  }
+}
